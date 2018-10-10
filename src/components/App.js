@@ -63,7 +63,7 @@ const App = ({ configUrl, userData, roomName, roomPassword }) => (
     </Connecting>
 
     <Disconnected>
-      <h1>Lost connection. Reattmpting to join...</h1>
+      <h1>Lost connection. Reattempting to join...</h1>
     </Disconnected>
 
     <Connected>
