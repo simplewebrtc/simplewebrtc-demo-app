@@ -1,10 +1,11 @@
+import { Provider } from "react-redux";
+import * as UUID from "uuid";
 import React from "react";
 import ReactDOM from "react-dom";
-import { Provider } from "react-redux";
-import { createStore, Actions } from "@andyet/simplewebrtc";
+
+import { createStore, Actions, Selectors } from "@andyet/simplewebrtc";
 
 import App from "./components/App";
-
 
 
 
@@ -30,13 +31,21 @@ const CONFIG_URL = `https://api.simplewebrtc.com/config/guest/${API_KEY}`
 // be sure to assign it to `simplewebrtc` in the top level of
 // your state object.
 const store = createStore();
+
+// We're exposing these here to make it easier for experimenting
+// with the actions and selectors in the console.
+//
+// This is NOT required for SimpleWebRTC to function.
 window.store = store;
 window.actions = Actions;
+window.selectors = Selectors;
 
 const params = new URLSearchParams(window.location.search);
 
 if (!params.get('room')) {
-  window.location = '/?room=simplewebrtc-demo-app';
+  // We're using a UUID for a random room name here, but that is
+  // NOT a requirement for SimpleWebRTC to function.
+  window.location = `/?room=${UUID.v4()}`;
 }
 
 if (API_KEY === 'YOUR_API_KEY') {

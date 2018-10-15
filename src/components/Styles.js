@@ -1,5 +1,7 @@
-import styled, { css, injectGlobal } from 'react-emotion';
+// This demo is using react-emotion for styling, but that is
+// NOT a requirement for using SimpleWebRTC
 
+import styled, { css, injectGlobal } from 'react-emotion';
 
 injectGlobal`
   body {
