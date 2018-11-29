@@ -1,5 +1,5 @@
-import React from 'react';
-import ContentEditable from 'react-contenteditable';
+import React from "react"
+import ContentEditable from "react-contenteditable"
 
 import {
   Provider,
@@ -18,7 +18,7 @@ import {
   ChatComposers,
   ChatList,
   ChatInput
-} from '@andyet/simplewebrtc';
+} from "@andyet/simplewebrtc"
 
 import {
   StyledUIContainer,
@@ -34,8 +34,7 @@ import {
   StyledMessageGroup,
   StyledMainContainer,
   StyledChatListContainer
-} from './Styles';
-
+} from "./Styles"
 
 const App = ({ configUrl, userData, roomName, roomPassword }) => (
   <Provider configUrl={configUrl} userData={userData}>
@@ -91,25 +90,33 @@ const App = ({ configUrl, userData, roomName, roomPassword }) => (
       <Room name={roomName} password={roomPassword}>
         {({ room, peers, localMedia, remoteMedia }) => {
           if (!room.joined) {
-            return <h1>Joining room...</h1>;
+            return <h1>Joining room...</h1>
           }
 
-          const remoteVideos = remoteMedia.filter(m => m.kind === 'video');
-          const localVideos = localMedia.filter(m => m.kind === 'video' && m.shared);
-          const localScreens = localVideos.filter(m => m.screenCapture);
+          const remoteVideos = remoteMedia.filter(m => m.kind === "video")
+          const localVideos = localMedia.filter(
+            m => m.kind === "video" && m.shared
+          )
+          const localScreens = localVideos.filter(m => m.screenCapture)
 
           return (
             <StyledUIContainer>
               <StyledToolbar>
                 <h1>{room.providedName}</h1>
                 <div>
-                  <span>{peers.length} Peer{peers.length !== 1 ? 's' : ''}</span>
-                  <PeerList room={room.address} speaking render={({ peers }) => {
-                    if (peers.length === 0) {
-                      return null;
-                    }
-                    return (<span> ({peers.length} speaking)</span>);
-                  }} />
+                  <span>
+                    {peers.length} Peer{peers.length !== 1 ? "s" : ""}
+                  </span>
+                  <PeerList
+                    room={room.address}
+                    speaking
+                    render={({ peers }) => {
+                      if (peers.length === 0) {
+                        return null
+                      }
+                      return <span> ({peers.length} speaking)</span>
+                    }}
+                  />
                 </div>
                 <div>
                   {/*
@@ -130,31 +137,41 @@ const App = ({ configUrl, userData, roomName, roomPassword }) => (
 
                     Including the `autoRemove` attribute will end the unshared media track.
                   */}
-                  {!!localScreens.length && <MediaControls media={localScreens[0]} autoRemove render={({ stopSharing }) => (
-                    <button onClick={stopSharing}>Stop Screenshare</button>
-                  )} />}
-                </div>
-                <UserControls render={({ user, isMuted, mute, unmute, setDisplayName }) => (
-                  <div>
-                    {/* A very basic method for setting a display name */}
-                    <ContentEditable
-                      className='display-name-editor'
-                      html={user.displayName}
-                      onChange={(event) => {
-                        setDisplayName(event.target.value.trim());
-                      }}
+                  {!!localScreens.length && (
+                    <MediaControls
+                      media={localScreens[0]}
+                      autoRemove
+                      render={({ stopSharing }) => (
+                        <button onClick={stopSharing}>Stop Screenshare</button>
+                      )}
                     />
-                    <button onClick={() => isMuted ? unmute() : mute()}>{isMuted ? 'Unmute' : 'Mute'}</button>
-                  </div>
-                )} />
+                  )}
+                </div>
+                <UserControls
+                  render={({ user, isMuted, mute, unmute, setDisplayName }) => (
+                    <div>
+                      {/* A very basic method for setting a display name */}
+                      <ContentEditable
+                        className="display-name-editor"
+                        html={user.displayName}
+                        onChange={event => {
+                          setDisplayName(event.target.value.trim())
+                        }}
+                      />
+                      <button onClick={() => (isMuted ? unmute() : mute())}>
+                        {isMuted ? "Unmute" : "Mute"}
+                      </button>
+                    </div>
+                  )}
+                />
               </StyledToolbar>
 
               <StyledMainContainer>
                 <StyledVideoContainer>
                   <GridLayout
-                    className='videogrid'
+                    className="videogrid"
                     items={[...localVideos, ...remoteVideos]}
-                    renderCell={(item) => (<Video media={item} />)}
+                    renderCell={item => <Video media={item} />}
                   />
                 </StyledVideoContainer>
 
@@ -180,8 +197,12 @@ const App = ({ configUrl, userData, roomName, roomPassword }) => (
                     renderGroup={({ chats, peer }) => (
                       <StyledMessageGroup key={chats[0].id}>
                         <StyledMessageMetadata>
-                          <StyledDisplayName>{peer.displayName ? peer.displayName : 'Anonymous'}</StyledDisplayName>{' '}
-                          <StyledTimestamp>{chats[0].time.toLocaleTimeString()}</StyledTimestamp>
+                          <StyledDisplayName>
+                            {peer.displayName ? peer.displayName : "Anonymous"}
+                          </StyledDisplayName>{" "}
+                          <StyledTimestamp>
+                            {chats[0].time.toLocaleTimeString()}
+                          </StyledTimestamp>
                         </StyledMessageMetadata>
                         {/*
                           There is an `acked` property on the message object that can be used
@@ -189,7 +210,9 @@ const App = ({ configUrl, userData, roomName, roomPassword }) => (
                           rendering the body text in gray to black).
                         */}
                         {chats.map(message => (
-                          <StyledMessage key={message.id}>{message.body}</StyledMessage>
+                          <StyledMessage key={message.id}>
+                            {message.body}
+                          </StyledMessage>
                         ))}
                       </StyledMessageGroup>
                     )}
@@ -203,7 +226,7 @@ const App = ({ configUrl, userData, roomName, roomPassword }) => (
                     */}
                     <ChatInput
                       room={room.address}
-                      placeholder='Send a message...'
+                      placeholder="Send a message..."
                     />
 
                     {/*
@@ -211,18 +234,19 @@ const App = ({ configUrl, userData, roomName, roomPassword }) => (
                       typing in a given room. How you wish to display that information is up to you
                       with a custom `render` function property.
                     */}
-                    <ChatComposers className={StyledTyping} room={room.address} />
-
+                    <ChatComposers
+                      className={StyledTyping}
+                      room={room.address}
+                    />
                   </StyledChatInputContainer>
                 </StyledChatContainer>
-
               </StyledMainContainer>
             </StyledUIContainer>
-          );
+          )
         }}
       </Room>
     </Connected>
   </Provider>
-);
+)
 
-export default App;
+export default App
