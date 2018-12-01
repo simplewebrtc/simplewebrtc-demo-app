@@ -6,7 +6,7 @@ import * as UUID from "uuid"
 // Replace `YOUR_API_KEY` here with the API key you received when
 // signing up for SimpleWebRTC
 // --------------------------------------------------------------------
-const API_KEY = process.env.API_KEY || "YOUR_API_KEY"
+const API_KEY = process.env.API_KEY || "YOUR_API_KEYY"
 // ====================================================================
 
 if (API_KEY === "YOUR_API_KEY") {
@@ -24,7 +24,7 @@ const params = new URLSearchParams(window.location.search)
 export const ROOM_NAME =
   process.env.ROOM_NAME ||
   params.get("room") ||
-  (window.location = `/?room=${UUID.v4()}`)
+  (window.location = `${window.location.pathname}?room=${UUID.v4()}`)
 
 export const ROOM_PASSWORD =
   process.env.ROOM_PASSWORD || params.get("key") || ""

@@ -20,13 +20,12 @@ window.store = store
 window.actions = Actions
 window.selectors = Selectors
 
-ReactDOM.render(
+export default () => (
   <Provider store={store}>
     <App
       configUrl={CONFIG_URL}
       roomName={ROOM_NAME}
       roomPassword={ROOM_PASSWORD}
     />
-  </Provider>,
-  document.getElementById("app")
+  </Provider>
 )

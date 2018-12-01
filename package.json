@@ -20,14 +20,25 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-react": "^7.0.0",
+    "cpx": "^1.5.0",
+    "mkdirp": "^0.5.1",
+    "now": "^12.1.8",
+    "opn": "^5.4.0",
     "parcel-bundler": "^1.5.1",
-    "prettier": "^1.15.2"
+    "prettier": "^1.15.2",
+    "rimraf": "^2.6.2",
+    "serve": "^10.1.1"
   },
   "license": "MIT",
   "main": "src/index.js",
   "private": true,
   "scripts": {
-    "start": "parcel --https",
-    "build": "parcel build"
+    "build": "NODE_ENV=production node build/parcel.js build",
+    "clean": "rimraf dist",
+    "deploy": "now",
+    "prebuild": "npm run clean",
+    "prestart": "npm run clean",
+    "serve": "serve",
+    "start": "node build/parcel.js"
   }
 }
