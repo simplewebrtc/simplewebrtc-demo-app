@@ -6,7 +6,7 @@ import * as UUID from "uuid"
 // Replace `YOUR_API_KEY` here with the API key you received when
 // signing up for SimpleWebRTC
 // --------------------------------------------------------------------
-const API_KEY = process.env.API_KEY || "YOUR_API_KEYY"
+const API_KEY = process.env.API_KEY || "YOUR_API_KEY"
 // ====================================================================
 
 if (API_KEY === "YOUR_API_KEY") {

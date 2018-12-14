@@ -4,9 +4,9 @@ const path = require("path")
 const parcel = require("parcel-bundler")
 const open = require("opn")
 const cpx = require("cpx")
+const rimraf = require("rimraf")
 
 const mkdirp = promisify(require("mkdirp"))
-const rimraf = promisify(require("rimraf"))
 const readdir = promisify(fs.readdir)
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
@@ -22,6 +22,21 @@ const once = fn => {
     hasRun = true
     fn()
   }
+}
+
+const registerOnExit = runOnExit => {
+  const exitHandler = ({ cleanup = false } = {}) =>
+    cleanup === true ? runOnExit() : process.exit()
+
+  //do something when app is closing
+  process.on("exit", () => exitHandler({ cleanup: true }))
+  //catches ctrl+c event
+  process.on("SIGINT", () => exitHandler())
+  // catches "kill pid" (for example: nodemon restart)
+  process.on("SIGUSR1", () => exitHandler())
+  process.on("SIGUSR2", () => exitHandler())
+  //catches uncaught exceptions
+  process.on("uncaughtException", () => exitHandler())
 }
 
 const openDemos = async () => {
@@ -54,14 +69,20 @@ const writeApp = async dir =>
   )
 
 const startParcel = async () => {
-  const demoDir = path.join(__dirname, "..", "demos")
+  const demoGlob = path.join(__dirname, "..", "demos", "**", "*")
   const tmpDir = path.join(__dirname, "..", ".demos")
 
-  const cleanup = () => rimraf(tmpDir)
+  // Sync so it works with process exit handelrs
+  const cleanup = () => rimraf.sync(tmpDir)
 
-  await cleanup()
-  await copy(path.join(demoDir, "**", "*"), tmpDir, { clean: true })
+  cleanup()
 
+  // Copy everything from demo to a temporary directory
+  // Allows the demos to be simpler and only export the main component but still
+  // share all the client code from build/ like the index.html and HMR
+  await copy(demoGlob, tmpDir, { clean: true })
+
+  // Then write the main app file and index.html to each temporary demo
   for (const demo of await readdir(tmpDir)) {
     const demoPath = path.join(tmpDir, demo)
     const demoStats = await stat(demoPath)
@@ -77,20 +98,18 @@ const startParcel = async () => {
   })
 
   if (BUILD) {
-    bundler.on("buildEnd", async () => await cleanup())
+    bundler.on("buildEnd", cleanup)
     bundler.bundle()
   } else {
     // This event is supposed to be emitted only after bundling has finished for the first
-    // time but thats not the case so we use the hasOpened flag
+    // time but thats not the case so we use "once"
     bundler.on(
       "bundled",
       once(() => {
         openDemos()
-        cpx.watch(path.join(demoDir, "**", "*"), tmpDir, { initialCopy: false })
-        process.on("SIGINT", async () => {
-          await cleanup()
-          process.exit(0)
-        })
+        // Setup a watcher to automatically copy changes from the real demo to the temporary demo
+        cpx.watch(demoGlob, tmpDir, { initialCopy: false })
+        registerOnExit(cleanup)
       })
     )
 
