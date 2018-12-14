@@ -44,6 +44,6 @@
     "prebuild": "npm run clean",
     "prestart": "npm run clean",
     "serve": "serve",
-    "start": "node build/parcel.js"
+    "start": "node build/parcel.js serve"
   }
 }

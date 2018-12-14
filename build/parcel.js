@@ -13,7 +13,7 @@ const readFile = promisify(fs.readFile)
 const stat = promisify(fs.stat)
 const copy = promisify(cpx.copy)
 
-const BUILD = process.argv.slice(2).includes("build")
+const [CLI_COMMAND, ...CLI_DEMOS] = process.argv.slice(2)
 
 const registerOnExit = runOnExit => {
   const exitHandler = ({ cleanup = false } = {}) =>
@@ -30,25 +30,69 @@ const registerOnExit = runOnExit => {
   process.on("uncaughtException", () => exitHandler())
 }
 
-const openDemos = async port => {
-  const demos = (await readdir("./demos")).filter(i => i !== "config.js")
+const listDemos = async p => {
+  for (const demo of CLI_DEMOS) {
+    // Throw an error if any picked CLI demos dont exist
+    try {
+      await stat(path.join(p, demo))
+    } catch (e) {
+      if (e.code === "ENOENT") {
+        throw new Error(`The provided demo directory ${demo} does not exist`)
+      }
+      throw e
+    }
+  }
 
-  for (const demo of demos) {
-    await open(`https://localhost:${port}/${demo}/index.html`, {
-      // https://github.com/sindresorhus/opn#app
-      app: ["google chrome"],
-      // Set wait to true to have the demos open one at a time
-      // The only caveat is that the application must be *quit completely*
-      // for the next demo to open
-      wait: false
-    })
+  const result = []
+  const demoDirs = (await readdir(p)).filter(
+    d => (CLI_DEMOS.length ? CLI_DEMOS.includes(d) : true)
+  )
+
+  for (const demo of demoDirs) {
+    const demoPath = path.join(p, demo)
+    const demoStats = await stat(demoPath)
+    if (demoStats.isDirectory()) {
+      result.push({ name: demo, path: demoPath })
+    }
+  }
+
+  return result
+}
+
+const openDemos = async port => {
+  const demos = await listDemos("./demos")
+
+  const openOptions = {
+    // https://github.com/sindresorhus/opn#app
+    // Demo testing works better in Chrome
+    app: ["google chrome"]
+  }
+
+  if (demos.length === 1) {
+    open(`https://localhost:${port}/index.html`, openOptions)
+  } else {
+    for (const demo of demos) {
+      await open(`https://localhost:${port}/${demo.name}/index.html`, {
+        ...openOptions,
+        // Set wait to true to have the demos open one at a time
+        // The only caveat is that the application must be *quit completely*
+        // for the next demo to open
+        wait: false
+      })
+    }
   }
 }
 
-const writeHtml = async dir =>
+const writeHtml = async (dir, hasCss) =>
   writeFile(
     path.join(dir, "index.html"),
-    (await readFile(path.join(__dirname, "index.html"))).toString(),
+    (await readFile(path.join(__dirname, "index.html")))
+      .toString()
+      .replace(
+        /(<\/head>)/,
+        `${hasCss ? "<link rel='stylesheet' href='./main.css'>" : ""}$1`
+      )
+      .replace(/\{\{title\}\}/g, path.basename(dir)),
     "utf-8"
   )
 
@@ -74,13 +118,10 @@ const startParcel = async () => {
   await copy(demoGlob, tmpDir, { clean: true })
 
   // Then write the main app file and index.html to each temporary demo
-  for (const demo of await readdir(tmpDir)) {
-    const demoPath = path.join(tmpDir, demo)
-    const demoStats = await stat(demoPath)
-    if (demoStats.isDirectory()) {
-      await writeHtml(demoPath)
-      await writeApp(demoPath)
-    }
+  for (const demo of await listDemos(tmpDir)) {
+    const hasCss = fs.existsSync(path.join(demo.path, "main.css"))
+    await writeHtml(demo.path, hasCss)
+    await writeApp(demo.path)
   }
 
   const bundler = new parcel(path.join(tmpDir, "**", "index.html"), {
@@ -88,7 +129,7 @@ const startParcel = async () => {
     https: true
   })
 
-  if (BUILD) {
+  if (CLI_COMMAND === "build") {
     bundler.on("buildEnd", cleanup)
     bundler.bundle()
   } else {

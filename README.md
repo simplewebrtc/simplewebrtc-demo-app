@@ -1,21 +1,19 @@
 # SimpleWebRTC Demo
 
-To get started, you will first need to edit `src/index.js` to set your API key.
-
-See the section marked `IMPORTANT SETUP`, and change the value of the `API_KEY` constant to the API key you were provided.
+To get started, you will first need to create a `.env.local` file with `API_KEY` set to your API key.
 
 ## Running
 
 ```sh
 npm install
-npm start
+npm start # runs all the demos simultaneously
+# Or to run a specific demo
+npm start -- <DEMO_NAME>
 ```
-
-Once the server is running, go to [https://localhost:1234?room=pick-a-room-name](https://localhost:1234?room=pick-a-room-name).
 
 ## Setting up Screensharing
 
-For this demo, you will need to manually install this Chrome extension:
+For any demos involving screensharing, you will need to manually install this Chrome extension:
 
 [https://chrome.google.com/webstore/detail/simplewebrtc-sample-scree/ikljcimogjdaoojhmkbioipmffflodgk](https://chrome.google.com/webstore/detail/simplewebrtc-sample-scree/ikljcimogjdaoojhmkbioipmffflodgk)
 

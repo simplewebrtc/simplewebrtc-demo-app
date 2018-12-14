@@ -81,3 +81,4 @@ typings/
 .cache
 dist
 .demos
+.env.local
