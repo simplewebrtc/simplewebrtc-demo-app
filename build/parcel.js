@@ -15,15 +15,6 @@ const copy = promisify(cpx.copy)
 
 const BUILD = process.argv.slice(2).includes("build")
 
-const once = fn => {
-  let hasRun = false
-  return () => {
-    if (hasRun) return
-    hasRun = true
-    fn()
-  }
-}
-
 const registerOnExit = runOnExit => {
   const exitHandler = ({ cleanup = false } = {}) =>
     cleanup === true ? runOnExit() : process.exit()
@@ -39,11 +30,11 @@ const registerOnExit = runOnExit => {
   process.on("uncaughtException", () => exitHandler())
 }
 
-const openDemos = async () => {
+const openDemos = async port => {
   const demos = (await readdir("./demos")).filter(i => i !== "config.js")
 
   for (const demo of demos) {
-    await open(`https://localhost:3000/${demo}/index.html`, {
+    await open(`https://localhost:${port}/${demo}/index.html`, {
       // https://github.com/sindresorhus/opn#app
       app: ["google chrome"],
       // Set wait to true to have the demos open one at a time
@@ -101,19 +92,11 @@ const startParcel = async () => {
     bundler.on("buildEnd", cleanup)
     bundler.bundle()
   } else {
-    // This event is supposed to be emitted only after bundling has finished for the first
-    // time but thats not the case so we use "once"
-    bundler.on(
-      "bundled",
-      once(() => {
-        openDemos()
-        // Setup a watcher to automatically copy changes from the real demo to the temporary demo
-        cpx.watch(demoGlob, tmpDir, { initialCopy: false })
-        registerOnExit(cleanup)
-      })
-    )
-
-    bundler.serve(3000, true)
+    const server = await bundler.serve(3000, true)
+    openDemos(server.address().port)
+    // Setup a watcher to automatically copy changes from the real demo to the temporary demo
+    cpx.watch(demoGlob, tmpDir, { initialCopy: false })
+    registerOnExit(cleanup)
   }
 }
 
