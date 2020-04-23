@@ -1,5 +1,7 @@
 # SimpleWebRTC Demo
 
+**This is an older demo of our sdk. For the latest demo head over to https://github.com/simplewebrtc/simplewebrtc-talky-sample-app. These demos are similar to each other but the newer one is updated more reguarly.**
+
 To get started, you will first need to edit `src/index.js` to set your API key.
 
 See the section marked `IMPORTANT SETUP`, and change the value of the `API_KEY` constant to the API key you were provided.
