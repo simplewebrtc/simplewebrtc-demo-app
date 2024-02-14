@@ -19,7 +19,7 @@
     "uuid": "^3.3.2",
     "webpack": "^4.14.0",
     "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "^3.1.4"
+    "webpack-dev-server": "^4.8.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
